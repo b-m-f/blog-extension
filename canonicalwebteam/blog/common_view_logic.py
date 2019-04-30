@@ -5,15 +5,17 @@ category_cache = {}
 group_cache = {}
 
 
-def get_index_context(page_param, articles, total_pages):
+def get_index_context(page_param, articles, total_pages, featured_articles=[]):
     """
     Build the content for the index page
     :param page_param: String or int for index of the page to get
     :param articles: Array of articles
     :param articles: String of int of total amount of pages
     """
+    print("HELLO")
+    print(featured_articles)
 
-    for article in articles:
+    def transform_index_article(article):
         featured_image = api.get_media(article["featured_media"])
 
         author = api.get_user(article["author"])
@@ -38,16 +40,25 @@ def get_index_context(page_param, articles, total_pages):
                 article["group"] = group_cache[group_id]
                 first_item = False
 
-        article = logic.transform_article(
+        return logic.transform_article(
             article, featured_image=featured_image, author=author
         )
+
+    transformed_articles = []
+    transformed_featured_articles = []
+    for article in articles:
+        transformed_articles.append(transform_index_article(article))
+
+    for article in featured_articles:
+        transformed_featured_articles.append(transform_index_article(article))
 
     return {
         "current_page": int(page_param),
         "total_pages": int(total_pages),
-        "articles": articles,
+        "articles": transformed_articles,
         "used_categories": category_cache,
         "groups": group_cache,
+        "featured_articles": transformed_featured_articles,
     }
 
 
